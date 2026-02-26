@@ -1,0 +1,38 @@
+{
+  "run_id": "{run_id}",
+  "workflow": "{workflow}",
+  "status": "active",
+  "created_at": "{timestamp}",
+  "updated_at": "{timestamp}",
+  
+  "entry_type": "idea",
+  "repo_root": "",
+  "scope": "full",
+  
+  "switches": {
+    "need_database": false,
+    "need_billing": false,
+    "need_auth": false,
+    "need_deploy": false,
+    "need_seo": false
+  },
+  
+  "constraints": {
+    "timeline": null,
+    "risk_preference": "balanced",
+    "tech_stack": null
+  },
+  
+  "workers": {
+    "assigned": [],
+    "completed": [],
+    "failed": []
+  },
+  
+  "artifacts": {
+    "proposal": "proposal.md",
+    "tasks": "tasks.md",
+    "evidence": "evidence/",
+    "logs": "logs/"
+  }
+}

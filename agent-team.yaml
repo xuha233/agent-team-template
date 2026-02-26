@@ -1,0 +1,175 @@
+version: "1.0"
+
+# Orchestrator 配置
+orchestrator:
+  name: openclaw
+  role: dispatcher
+  description: "任务分发和协调中心"
+  responsibilities:
+    - 需求澄清 (workflow-project-intake)
+    - 任务拆解和分发
+    - 进度追踪
+    - 冲突协调
+  skills:
+    - workflow-project-intake
+    - workflow-brainstorm
+
+# Workers 配置
+workers:
+  # 主力 Worker
+  - name: claude-code
+    role: executor
+    description: "Claude Code 执行器"
+    priority: 1
+    skills:
+      # 核心工作流
+      - workflow-feature-shipper
+      - workflow-ship-faster
+      # 审查
+      - review-quality
+      - review-merge-readiness
+      - review-react-best-practices
+      # 工具
+      - tool-design-style-selector
+      - tool-systematic-debugging
+      - tool-ui-ux-pro-max
+    settings:
+      max_parallel_tasks: 3
+      batch_size: 3
+      checkpoint_interval: 5m
+      
+  # 替代 Worker (功能等效)
+  - name: opencode
+    role: executor
+    description: "OpenCode 执行器 (Claude Code 替代)"
+    priority: 2
+    alternative_to: claude-code
+    skills:
+      - workflow-feature-shipper
+      - workflow-ship-faster
+      - review-quality
+      - tool-design-style-selector
+      - tool-systematic-debugging
+
+# 工作流映射
+workflows:
+  # 阶段 1: 需求澄清
+  intake: workflow-project-intake
+  
+  # 阶段 2: 头脑风暴
+  brainstorm: workflow-brainstorm
+  
+  # 阶段 3: 单功能开发
+  feature: workflow-feature-shipper
+  
+  # 阶段 4: 端到端交付
+  ship: workflow-ship-faster
+  
+  # 阶段 5: 质量审查
+  review: review-quality
+
+# 审查流程
+review_chain:
+  default: review-quality
+  triage:
+    react_performance: review-react-best-practices
+    merge_readiness: review-merge-readiness
+    seo: review-seo-audit
+    clean_code: review-clean-code
+
+# 存储配置
+storage:
+  # 默认使用 runs/ 目录
+  artifact_store: runs/
+  
+  # OpenSpec 兼容模式
+  openspec_mode: auto  # auto | enabled | disabled
+  
+  # 目录结构
+  paths:
+    active: runs/{workflow}/active/{run_id}/
+    archive: runs/{workflow}/archive/{date}-{run_id}/
+    evidence: evidence/
+    logs: logs/
+
+# 检查点配置
+checkpoints:
+  enabled: true
+  
+  # 自动保存间隔
+  auto_save_interval: 10m
+  
+  # 关键操作必须确认
+  confirmation_required:
+    - database_write
+    - payment_action
+    - deploy
+    - force_push
+    - delete
+
+# 并行执行配置
+parallel:
+  enabled: true
+  max_workers: 3
+  
+  # 可并行的任务类型
+  parallelizable:
+    - code_review
+    - file_scan
+    - test_execution
+    - documentation
+
+# 自动化配置
+automation:
+  # 自动审查
+  auto_review: true
+  auto_review_triggers:
+    - feature_complete
+    - before_merge
+    - after_batch
+  
+  # 自动归档
+  auto_archive: true
+  archive_on_complete: true
+
+# 日志配置
+logging:
+  level: info
+  format: json
+  
+  # 事件日志
+  events_log: logs/events.jsonl
+  
+  # 状态日志
+  state_log: logs/state.json
+
+# 集成配置
+integrations:
+  supabase:
+    enabled: false
+    skill: supabase
+    trigger: need_database
+    
+  stripe:
+    enabled: false
+    skill: stripe
+    trigger: need_billing
+    
+  cloudflare:
+    enabled: false
+    skill: cloudflare
+    trigger: need_deploy
+
+# 默认值
+defaults:
+  scope: full
+  quality_bar: demo-ready
+  risk_preference: balanced
+  
+  # context.json 默认值
+  context:
+    need_database: false
+    need_billing: false
+    need_auth: false
+    need_deploy: false
+    need_seo: false

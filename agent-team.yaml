@@ -1,175 +1,256 @@
-version: "1.0"
+version: "2.0"
 
-# Orchestrator 配置
-orchestrator:
-  name: openclaw
-  role: dispatcher
-  description: "任务分发和协调中心"
-  responsibilities:
-    - 需求澄清 (workflow-project-intake)
-    - 任务拆解和分发
-    - 进度追踪
-    - 冲突协调
-  skills:
-    - workflow-project-intake
-    - workflow-brainstorm
+# AAIF框架配置
+framework: AAIF  # AI Agile Incubation Framework
 
-# Workers 配置
-workers:
-  # 主力 Worker
-  - name: claude-code
-    role: executor
-    description: "Claude Code 执行器"
-    priority: 1
+# 核心循环
+core_loop:
+  phases:
+    - explore    # 探索
+    - build      # 构建
+    - validate   # 验证
+    - learn      # 学习
+
+# Agent 角色定义
+agents:
+  # 协调者
+  orchestrator:
+    name: openclaw
+    role: coordinator
+    description: "协调整个团队、适应性治理、学习捕获"
+    responsibilities:
+      - 项目复杂度评估
+      - 策略选择与调整
+      - 冲突协调
+      - 经验教训捕获
     skills:
-      # 核心工作流
-      - workflow-feature-shipper
-      - workflow-ship-faster
-      # 审查
-      - review-quality
-      - review-merge-readiness
-      - review-react-best-practices
-      # 工具
-      - tool-design-style-selector
-      - tool-systematic-debugging
-      - tool-ui-ux-pro-max
-    settings:
-      max_parallel_tasks: 3
-      batch_size: 3
-      checkpoint_interval: 5m
+      - workflow-project-intake
+      - workflow-brainstorm
+    outputs:
+      - hypotheses.md
+      - lessons-learned.md
       
-  # 替代 Worker (功能等效)
-  - name: opencode
-    role: executor
-    description: "OpenCode 执行器 (Claude Code 替代)"
-    priority: 2
-    alternative_to: claude-code
+  # 产品负责人
+  product_owner:
+    name: product-owner-agent
+    role: value_driver
+    description: "假设定义、价值验证、优先级管理"
+    responsibilities:
+      - 业务需求翻译
+      - 假设驱动开发
+      - 成功标准定义
+      - 利益相关者沟通
     skills:
       - workflow-feature-shipper
-      - workflow-ship-faster
-      - review-quality
-      - tool-design-style-selector
+    outputs:
+      - success-criteria.md
+      - value-validation.md
+      
+  # 数据 Agent
+  data:
+    name: data-agent
+    role: data_specialist
+    description: "数据探索、质量评估、管道构建"
+    responsibilities:
+      - 数据质量评估
+      - 数据预处理
+      - 特征工程
+      - 数据管道开发
+    skills:
+      - supabase
       - tool-systematic-debugging
+    outputs:
+      - data-assessment.md
+      - data-pipeline/
+      
+  # ML Agent
+  ml:
+    name: ml-agent
+    role: model_specialist
+    description: "模型设计、训练、评估"
+    responsibilities:
+      - 算法选择
+      - 模型架构设计
+      - 超参数调优
+      - 性能评估
+    skills:
+      - review-quality
+    outputs:
+      - model-experiments/
+      - performance-report.md
+      
+  # 开发 Agent
+  dev:
+    name: claude-code
+    alternative: opencode
+    role: developer
+    description: "应用开发、功能实现、系统集成"
+    responsibilities:
+      - 前后端开发
+      - API 设计
+      - 集成测试
+      - 代码质量
+    skills:
+      - workflow-feature-shipper
+      - review-quality
+      - review-react-best-practices
+    outputs:
+      - feature-code/
+      
+  # UX Agent
+  ux:
+    name: ux-agent
+    role: experience_designer
+    description: "用户体验设计、交互原型、可用性测试"
+    responsibilities:
+      - 用户研究
+      - 交互设计
+      - 原型设计
+      - 可用性测试
+    skills:
+      - tool-design-style-selector
+      - tool-ui-ux-pro-max
+    outputs:
+      - ux-design.md
+      - user-feedback.md
+      
+  # DevOps Agent
+  devops:
+    name: devops-agent
+    role: infrastructure
+    description: "部署、监控、运维"
+    responsibilities:
+      - CI/CD 管道
+      - 容器化
+      - 监控告警
+      - 性能优化
+    skills:
+      - cloudflare
+      - mcp-cloudflare
+    outputs:
+      - deployment-config/
 
-# 工作流映射
-workflows:
-  # 阶段 1: 需求澄清
-  intake: workflow-project-intake
-  
-  # 阶段 2: 头脑风暴
-  brainstorm: workflow-brainstorm
-  
-  # 阶段 3: 单功能开发
-  feature: workflow-feature-shipper
-  
-  # 阶段 4: 端到端交付
-  ship: workflow-ship-faster
-  
-  # 阶段 5: 质量审查
-  review: review-quality
-
-# 审查流程
-review_chain:
-  default: review-quality
-  triage:
-    react_performance: review-react-best-practices
-    merge_readiness: review-merge-readiness
-    seo: review-seo-audit
-    clean_code: review-clean-code
-
-# 存储配置
-storage:
-  # 默认使用 runs/ 目录
-  artifact_store: runs/
-  
-  # OpenSpec 兼容模式
-  openspec_mode: auto  # auto | enabled | disabled
-  
-  # 目录结构
-  paths:
-    active: runs/{workflow}/active/{run_id}/
-    archive: runs/{workflow}/archive/{date}-{run_id}/
-    evidence: evidence/
-    logs: logs/
-
-# 检查点配置
-checkpoints:
-  enabled: true
-  
-  # 自动保存间隔
-  auto_save_interval: 10m
-  
-  # 关键操作必须确认
-  confirmation_required:
-    - database_write
-    - payment_action
-    - deploy
-    - force_push
-    - delete
-
-# 并行执行配置
-parallel:
-  enabled: true
-  max_workers: 3
-  
-  # 可并行的任务类型
-  parallelizable:
-    - code_review
-    - file_scan
-    - test_execution
-    - documentation
-
-# 自动化配置
-automation:
-  # 自动审查
-  auto_review: true
-  auto_review_triggers:
-    - feature_complete
-    - before_merge
-    - after_batch
-  
-  # 自动归档
-  auto_archive: true
-  archive_on_complete: true
-
-# 日志配置
-logging:
-  level: info
-  format: json
-  
-  # 事件日志
-  events_log: logs/events.jsonl
-  
-  # 状态日志
-  state_log: logs/state.json
-
-# 集成配置
-integrations:
-  supabase:
-    enabled: false
-    skill: supabase
-    trigger: need_database
+# 扩展 Agent（按需）
+extended_agents:
+  domain_expert:
+    trigger: high_business_complexity
+    description: "领域知识、业务验证"
     
-  stripe:
-    enabled: false
-    skill: stripe
-    trigger: need_billing
-    
-  cloudflare:
-    enabled: false
-    skill: cloudflare
-    trigger: need_deploy
+  ethics:
+    trigger: high_risk | compliance_sensitive
+    description: "伦理评估、公平性检查"
 
-# 默认值
-defaults:
-  scope: full
-  quality_bar: demo-ready
-  risk_preference: balanced
+# 项目类型策略
+project_types:
+  exploratory:
+    criteria:
+      problem_clarity: low
+      data_availability: low
+      tech_novelty: high
+    strategy:
+      iteration_length: 1-2 weeks
+      priority: learning
+      approach: fast-fail
+    team: [product_owner, data, ml]
+    metrics: [learning_speed, hypothesis_validated]
+    
+  optimization:
+    criteria:
+      problem_clarity: high
+      data_availability: high
+      tech_novelty: low
+    strategy:
+      iteration_length: 2-3 weeks
+      priority: delivery
+      approach: predictable
+    team: [product_owner, data, ml, dev, devops]
+    metrics: [delivery_speed, performance_improvement]
+    
+  transformation:
+    criteria:
+      problem_clarity: medium
+      data_availability: medium
+      business_risk: high
+    strategy:
+      iteration_length: mixed
+      priority: balanced
+      approach: value_gates
+    team: [product_owner, data, ml, dev, ux, devops]
+    metrics: [stage_value, user_adoption]
+    
+  compliance_sensitive:
+    criteria:
+      business_risk: high
+      compliance_required: true
+    strategy:
+      iteration_length: 3-4 weeks
+      priority: compliance
+      approach: strict_checkpoints
+    team: [product_owner, data, ml, dev, devops, ethics]
+    metrics: [compliance_score, fairness_metrics]
+
+# 复杂度评估
+complexity_assessment:
+  dimensions:
+    - problem_clarity      # 问题清晰度
+    - data_availability    # 数据可用性
+    - tech_novelty         # 技术新颖性
+    - business_risk        # 业务风险
+    
+  levels:
+    low: 1
+    medium: 2
+    high: 3
+
+# 假设驱动开发
+hypothesis_driven:
+  template: hypotheses/template.md
+  states:
+    - pending
+    - validating
+    - validated
+    - partially_validated
+    - falsified
   
-  # context.json 默认值
-  context:
-    need_database: false
-    need_billing: false
-    need_auth: false
-    need_deploy: false
-    need_seo: false
+  priority_matrix:
+    quick_win:      # 高影响、低不确定性
+      action: implement_first
+    big_bet:        # 高影响、高不确定性
+      action: staged_exploration
+    research:       # 低影响、高不确定性
+      action: small_experiment
+    low_priority:   # 低影响、低不确定性
+      action: defer
+
+# 阶段输出
+phase_outputs:
+  explore:
+    - hypotheses.md
+    - data-assessment.md
+    - success-criteria.md
+    - exploration-log.md
+  build:
+    - data-pipeline/
+    - model-experiments/
+    - feature-code/
+    - ux-design.md
+  validate:
+    - performance-report.md
+    - user-feedback.md
+    - value-validation.md
+    - compliance-check.md
+  learn:
+    - learning-log.md
+    - lessons-learned.md
+    - next-actions.md
+
+# 学习捕获
+learning_capture:
+  triggers:
+    - phase_complete
+    - hypothesis_validated
+    - hypothesis_falsified
+    - pivot_decision
+  outputs:
+    - lessons-learned.md
+    - knowledge-base-update

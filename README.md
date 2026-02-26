@@ -1,271 +1,443 @@
-# Agent Team Template
+# Agent Team Template v2.0
 
-一套即开即用的多 Agent 协作模板，深度集成 ship-faster 工具链。
+基于 AAIF 框架（AI敏捷孵化框架）设计的多 Agent 协作模板。
 
-## 架构概览
+## 核心理念
 
+### 从"任务分发"到"假设验证"
+
+传统模式：
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                        用户 / 外部系统                            │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                    OpenClaw (Orchestrator)                       │
-│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐              │
-│  │   Intake    │  │  Dispatcher │  │   Tracker   │              │
-│  │  需求澄清    │  │  任务分发    │  │  进度追踪    │              │
-│  └─────────────┘  └─────────────┘  └─────────────┘              │
-└───────────────────────────────┬─────────────────────────────────┘
-                                │
-            ┌───────────────────┼───────────────────┐
-            ▼                   ▼                   ▼
-   ┌─────────────────┐ ┌─────────────────┐ ┌─────────────────┐
-   │  Claude Code    │ │  Claude Code    │ │  Claude Code    │
-   │   Worker #1     │ │   Worker #2     │ │   Worker #N     │
-   │  (或 OpenCode)  │ │  (或 OpenCode)  │ │  (或 OpenCode)  │
-   └─────────────────┘ └─────────────────┘ └─────────────────┘
-            │                   │                   │
-            └───────────────────┴───────────────────┘
-                                │
-                                ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                      Ship-Faster Skills                          │
-│  workflow-*  │  review-*  │  tool-*  │  supabase/stripe/...     │
-└─────────────────────────────────────────────────────────────────┘
+需求 → 任务拆分 → 分发执行 → 交付
 ```
 
-## 角色分工
-
-### OpenClaw (Orchestrator)
-- **职责**：需求澄清、任务分发、进度追踪、协调冲突
-- **核心 Skills**：`workflow-project-intake`, `workflow-brainstorm`
-- **输出**：`proposal.md`, `context.json`, `tasks.md`
-
-### Claude Code / OpenCode (Worker)
-- **职责**：执行具体任务、代码实现、测试验证
-- **核心 Skills**：`workflow-feature-shipper`, `review-*`, `tool-*`
-- **输出**：代码变更、`evidence/` 文档、验证报告
-
-## 快速开始
-
-### 1. 安装依赖
-
-```bash
-# 安装 ship-faster skills
-git clone https://github.com/Heyvhuang/ship-faster.git
-cp -r ship-faster/skills/* ~/.claude/skills/
-
-# 克隆此模板
-git clone https://github.com/YOUR_USERNAME/agent-team-template.git
+AAIF 模式：
+```
+假设 → 实验设计 → 构建 → 验证 → 学习
 ```
 
-### 2. 启动新项目
+### 六大支柱
 
-向 OpenClaw 发送：
+| 支柱 | Agent 角色 | 核心职责 |
+|------|-----------|---------|
+| 探索导向规划 | Orchestrator + Product Owner | 假设驱动开发 |
+| 跨职能协作 | 多角色 Agent 团队 | 专业协作 |
+| 数据-模型双驱动 | Data Agent + ML Agent | 同步迭代 |
+| 价值驱动验证 | Product Owner + Domain Expert | 业务价值优先 |
+| 适应性治理 | Orchestrator | 轻量级治理 |
+| 持续学习 | All Agents | 经验捕获 |
+
+---
+
+## Agent 角色
+
+### 核心团队
+
 ```
-使用 workflow-project-intake 开始一个新项目
+┌─────────────────────────────────────────────────────────────┐
+│                    Orchestrator (OpenClaw)                   │
+│  职责：协调、治理、学习捕获                                    │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│ Product Owner │   │  Data Agent   │   │   ML Agent    │
+│ 需求/价值/优先级│   │ 数据/质量/管道 │   │ 模型/训练/评估 │
+└───────────────┘   └───────────────┘   └───────────────┘
+        │                   │                   │
+        └───────────────────┼───────────────────┘
+                            │
+        ┌───────────────────┼───────────────────┐
+        ▼                   ▼                   ▼
+┌───────────────┐   ┌───────────────┐   ┌───────────────┐
+│  Dev Agent    │   │  UX Agent     │   │  DevOps Agent │
+│ 代码/功能/集成 │   │ 体验/交互/原型 │   │ 部署/监控/运维 │
+└───────────────┘   └───────────────┘   └───────────────┘
 ```
 
-OpenClaw 会：
-1. 使用 `workflow-project-intake` 澄清需求
-2. 生成 `proposal.md` 和 `context.json`
-3. 根据需求决定分发策略
+### 角色定义
 
-### 3. 执行任务
+#### Orchestrator (OpenClaw)
+- **职责**：协调整个团队、适应性治理、学习捕获
+- **核心能力**：
+  - 项目复杂度评估
+  - 策略选择与调整
+  - 冲突协调
+  - 经验教训捕获
 
-OpenClaw 分发任务后，Workers 自动：
-1. 使用 `workflow-feature-shipper` 实现功能
-2. 使用 `review-quality` 进行代码审查
-3. 输出 evidence 文档
+#### Product Owner Agent
+- **职责**：假设定义、价值验证、优先级管理
+- **核心能力**：
+  - 业务需求翻译
+  - 假设驱动开发
+  - 成功标准定义
+  - 利益相关者沟通
 
-## 工作流程
+#### Data Agent
+- **职责**：数据探索、质量评估、管道构建
+- **核心能力**：
+  - 数据质量评估
+  - 数据预处理
+  - 特征工程
+  - 数据管道开发
 
-### Phase 1: Intake (需求澄清)
+#### ML Agent
+- **职责**：模型设计、训练、评估
+- **核心能力**：
+  - 算法选择
+  - 模型架构设计
+  - 超参数调优
+  - 性能评估
 
-**触发词**：`新项目`, `需求澄清`, `brainstorm`
+#### Dev Agent (Claude Code / OpenCode)
+- **职责**：应用开发、功能实现、系统集成
+- **核心能力**：
+  - 前后端开发
+  - API 设计
+  - 集成测试
+  - 代码质量
+
+#### UX Agent
+- **职责**：用户体验设计、交互原型、可用性测试
+- **核心能力**：
+  - 用户研究
+  - 交互设计
+  - 原型设计
+  - 可用性测试
+
+#### DevOps Agent
+- **职责**：部署、监控、运维
+- **核心能力**：
+  - CI/CD 管道
+  - 容器化
+  - 监控告警
+  - 性能优化
+
+### 扩展团队（按需）
+
+#### Domain Expert Agent
+- **职责**：领域知识、业务验证
+- **触发**：高业务复杂度项目
+
+#### Ethics Agent
+- **职责**：伦理评估、公平性检查
+- **触发**：高风险、合规敏感项目
+
+---
+
+## 工作流程：探索→构建→验证→学习
+
+### Phase 1: 探索 (Explore)
+
+**目标**：理解问题空间，识别数据可用性，形成初步假设
+
+**参与者**：Orchestrator + Product Owner + Data Agent + Domain Expert
 
 **流程**：
-1. OpenClaw 使用 `workflow-project-intake`
-2. 一次只问一个问题
-3. 确认核心循环、验收标准、非目标
-4. 输出 `proposal.md`, `context.json`
+```
+1. 业务问题细化
+   Product Owner: "问题是什么？业务价值是什么？"
+   
+2. 数据可用性评估
+   Data Agent: "有什么数据？质量如何？需要什么预处理？"
+   
+3. 假设形成
+   Orchestrator: "基于数据和能力，我们的假设是什么？"
+   
+4. 成功标准定义
+   Product Owner: "如何验证假设？成功/失败标准是什么？"
+```
 
-### Phase 2: Planning (任务规划)
+**输出**：
+- `hypotheses.md` - 假设清单
+- `data-assessment.md` - 数据评估报告
+- `success-criteria.md` - 成功标准
+- `exploration-log.md` - 探索日志
 
-**触发词**：`规划`, `拆解任务`
+### Phase 2: 构建 (Build)
 
-**流程**：
-1. OpenClaw 分析 `context.json`
-2. 决定需要哪些 skills
-3. 拆分为可并行的子任务
-4. 输出 `tasks.md`
+**目标**：开发数据管道、训练模型、构建产品原型
 
-### Phase 3: Execution (并行执行)
-
-**触发词**：`开始执行`, `实现`
-
-**流程**：
-1. OpenClaw 分发任务给 Workers
-2. Workers 使用 `workflow-feature-shipper`
-3. 每个 Worker 独立工作
-4. 定期报告进度
-
-### Phase 4: Review (质量审查)
-
-**触发词**：`审查`, `review`
+**参与者**：Data Agent + ML Agent + Dev Agent + UX Agent
 
 **流程**：
-1. Workers 完成任务后触发
-2. 使用 `review-quality` 进行审查
-3. 发现问题则修复
-4. 输出审查报告
+```
+1. 数据管道构建
+   Data Agent: 开发数据预处理管道
+   
+2. 模型训练实验
+   ML Agent: 设计实验，训练模型
+   
+3. 应用开发
+   Dev Agent: 实现功能，集成模型
+   
+4. 用户体验设计
+   UX Agent: 设计交互，构建原型
+```
 
-### Phase 5: Delivery (交付)
+**输出**：
+- `data-pipeline/` - 数据管道代码
+- `model-experiments/` - 模型实验记录
+- `feature-code/` - 功能代码
+- `ux-design.md` - UX 设计文档
 
-**触发词**：`交付`, `部署`
+### Phase 3: 验证 (Validate)
+
+**目标**：评估解决方案在实际环境中的表现和价值
+
+**参与者**：Product Owner + ML Agent + Dev Agent + Domain Expert
 
 **流程**：
-1. 合并所有变更
-2. 使用 `workflow-ship-faster` 部署
-3. 输出 `final.md`
+```
+1. 模型性能评估
+   ML Agent: 评估模型性能，分析偏差
+   
+2. 用户测试
+   UX Agent: 可用性测试，收集反馈
+   
+3. 业务价值验证
+   Product Owner: A/B 测试，转化率分析
+   
+4. 合规检查（如需要）
+   Ethics Agent: 公平性、隐私检查
+```
+
+**输出**：
+- `performance-report.md` - 性能报告
+- `user-feedback.md` - 用户反馈
+- `value-validation.md` - 价值验证结果
+- `compliance-check.md` - 合规检查报告
+
+### Phase 4: 学习 (Learn)
+
+**目标**：整合验证结果，决定下一步行动
+
+**参与者**：Orchestrator + All Agents
+
+**流程**：
+```
+1. 回顾会议
+   All: "什么有效？什么无效？我们学到了什么？"
+   
+2. 假设状态更新
+   Orchestrator: 更新假设清单（验证/部分验证/证伪）
+   
+3. 方向决策
+   Product Owner: 继续、转向、停止？
+   
+4. 经验捕获
+   Orchestrator: 记录经验教训，更新知识库
+```
+
+**输出**：
+- `learning-log.md` - 学习日志
+- `hypotheses-updated.md` - 更新的假设清单
+- `lessons-learned.md` - 经验教训
+- `next-actions.md` - 下一步行动
+
+---
+
+## 项目类型与策略选择
+
+### 复杂度评估矩阵
+
+| 维度 | 低 | 中 | 高 |
+|------|----|----|-----|
+| 问题清晰度 | 明确 | 需细化 | 模糊 |
+| 数据可用性 | 充足 | 有限 | 稀缺 |
+| 技术新颖性 | 成熟 | 部分 | 前沿 |
+| 业务风险 | 低 | 中 | 高 |
+
+### 四种项目类型
+
+#### 类型 1: 探索型
+- **特征**：问题模糊、数据稀缺、技术新颖
+- **策略**：极短迭代（1-2周）、学习优先、快速失败
+- **团队**：精简（Product Owner + Data Agent + ML Agent）
+- **关键指标**：学习速度、假设验证数量
+
+#### 类型 2: 优化型
+- **特征**：问题明确、数据充足、技术成熟
+- **策略**：标准敏捷（2-3周）、交付优先、可预测
+- **团队**：标准（+ Dev Agent + DevOps）
+- **关键指标**：功能交付速度、性能提升
+
+#### 类型 3: 转型型
+- **特征**：中等清晰度、中等风险、高业务影响
+- **策略**：混合模式、价值门控、平衡探索与交付
+- **团队**：完整（所有核心角色）
+- **关键指标**：阶段性价值实现、用户采纳率
+
+#### 类型 4: 合规敏感型
+- **特征**：高风险、需合规审查
+- **策略**：中等迭代（3-4周）、严格检查、可解释性优先
+- **团队**：完整 + Ethics Agent
+- **关键指标**：合规符合度、公平性指标
+
+---
+
+## 假设驱动开发 (HDD)
+
+### 假设模板
+
+```markdown
+## 假设 H-001
+
+### 假设陈述
+如果我们 [采取什么行动/实现什么功能]，
+那么 [预期什么结果/价值]。
+
+### 验证方法
+[如何验证这个假设？A/B测试？用户访谈？]
+
+### 成功标准
+- [量化指标达到X]
+- [统计显著性 p < 0.05]
+
+### 失败标准
+- [量化指标低于Y]
+- [用户反馈负面]
+
+### 最小验证实验
+[用最小成本验证假设的方法]
+
+### 状态
+- [ ] 待验证
+- [ ] 验证中
+- [ ] 已验证
+- [ ] 部分验证
+- [ ] 已证伪
+```
+
+### 假设优先级矩阵
+
+```
+        高影响
+           │
+    ┌──────┼──────┐
+    │ 重大赌注  │ 快速取胜 │
+    │ (Big Bet) │(Quick Win)│
+────┼──────────┼──────────┼───►
+    │ 探索研究  │ 低优先级 │
+    │(Research) │(Low Pri) │
+    └──────┼──────┘
+           │
+        低影响
+         高不确定性 ◄────► 低不确定性
+```
+
+---
 
 ## 文件结构
 
 ```
 project/
-├── runs/                          # 运行目录
-│   └── intake/
-│       └── active/
-│           └── <run_id>/
-│               ├── proposal.md    # 需求文档
-│               ├── context.json   # 上下文配置
-│               ├── tasks.md       # 任务清单
-│               └── evidence/      # 证据文档
-├── .claude/
-│   └── skills/                    # Claude Code skills
-└── agent-team.yaml                # Agent Team 配置
+├── runs/
+│   └── <run_id>/
+│       ├── hypotheses.md          # 假设清单
+│       ├── success-criteria.md    # 成功标准
+│       ├── context.json           # 上下文配置
+│       ├── exploration/           # 探索阶段
+│       │   ├── data-assessment.md
+│       │   └── exploration-log.md
+│       ├── build/                 # 构建阶段
+│       │   ├── data-pipeline/
+│       │   ├── model-experiments/
+│       │   └── feature-code/
+│       ├── validate/              # 验证阶段
+│       │   ├── performance-report.md
+│       │   ├── user-feedback.md
+│       │   └── value-validation.md
+│       ├── learn/                 # 学习阶段
+│       │   ├── learning-log.md
+│       │   ├── lessons-learned.md
+│       │   └── next-actions.md
+│       └── artifacts/             # 最终交付物
+└── .claude/
+    └── skills/
+        ├── agent-orchestrator/
+        ├── agent-product-owner/
+        ├── agent-data/
+        ├── agent-ml/
+        ├── agent-dev/
+        ├── agent-ux/
+        └── agent-devops/
 ```
 
-## 配置文件
+---
 
-### agent-team.yaml
+## 快速开始
 
-```yaml
-version: "1.0"
-orchestrator:
-  name: openclaw
-  role: dispatcher
-  
-workers:
-  - name: claude-code
-    role: executor
-    skills:
-      - workflow-feature-shipper
-      - review-quality
-      - tool-systematic-debugging
-    max_parallel: 3
-    
-  - name: opencode
-    role: executor
-    alternative_to: claude-code
-    skills:
-      - workflow-feature-shipper
-      - review-quality
+### 1. 启动新项目
 
-workflows:
-  intake: workflow-project-intake
-  feature: workflow-feature-shipper
-  ship: workflow-ship-faster
-  review: review-quality
-
-settings:
-  artifact_store: runs/
-  checkpoint_enabled: true
-  auto_review: true
+向 Orchestrator 发送：
+```
+新项目：我想做一个 [具体需求]
 ```
 
-## Skills 清单
-
-### Workflows
-| Skill | 用途 | 使用者 |
-|-------|------|--------|
-| `workflow-project-intake` | 需求澄清 | Orchestrator |
-| `workflow-brainstorm` | 头脑风暴 | Orchestrator |
-| `workflow-feature-shipper` | 单功能开发 | Worker |
-| `workflow-ship-faster` | 端到端交付 | Worker |
-
-### Reviews
-| Skill | 用途 | 使用者 |
-|-------|------|--------|
-| `review-quality` | 代码质量审查 | Worker |
-| `review-merge-readiness` | 合并就绪检查 | Worker |
-| `review-react-best-practices` | React 最佳实践 | Worker |
-
-### Tools
-| Skill | 用途 | 使用者 |
-|-------|------|--------|
-| `tool-design-style-selector` | 设计系统生成 | Worker |
-| `tool-systematic-debugging` | 系统化调试 | Worker |
-| `tool-ui-ux-pro-max` | UI/UX 参考 | Worker |
-
-## 最佳实践
-
-### 1. 一次只问一个问题
-OpenClaw 在 Intake 阶段遵循这个原则，避免信息过载。
-
-### 2. 文件优先
-所有状态都持久化到文件，支持中断恢复。
-
-### 3. 小步提交
-Workers 使用 `workflow-feature-shipper` 拆分为 PR 级别的小任务。
-
-### 4. 自动审查
-每个任务完成后自动触发 `review-quality`。
-
-### 5. 证据驱动
-所有决策都有 `evidence/` 文档支持。
-
-## 示例对话
-
-### 启动新项目
+### 2. Orchestrator 评估
 
 ```
-User: 我想做一个 AI 图片清理工具
+正在评估项目复杂度...
 
-OpenClaw: 好的，让我澄清一下需求。这个工具的核心功能是什么？
-  A) 自动识别并删除相似/重复图片
-  B) 智能推荐哪些图片可以删除
-  C) 手动标记 + AI 辅助分类
+维度评估：
+- 问题清晰度：中
+- 数据可用性：低
+- 技术新颖性：中
+- 业务风险：中
 
-User: B
+项目类型：转型型
 
-OpenClaw: 理解。验收标准是什么？
-  1) 能扫描指定文件夹
-  2) 能识别相似图片
-  3) 能生成删除建议列表
-  还需要补充吗？
+推荐团队配置：
+- Product Owner Agent
+- Data Agent
+- ML Agent
+- Dev Agent
+- DevOps Agent
 
-User: 加上：支持预览和一键清理
-
-OpenClaw: 已记录。非目标是什么？
-  1) 不支持视频处理
-  2) 不支持云端存储
-  对吗？
-
-User: 对
-
-OpenClaw: 需要数据库吗？(Supabase)
-User: 不需要，本地工具
-
-OpenClaw: 需要部署吗？
-User: 不需要，桌面应用
-
-OpenClaw: 好的，需求已澄清。正在生成 proposal.md...
-[创建 runs/intake/active/20260227-001/proposal.md]
-
-准备启动 Workers 实现。是否开始？
+推荐策略：混合迭代模式，阶段价值门控
 ```
+
+### 3. 开始探索
+
+```
+Orchestrator: 让我们开始探索阶段。
+
+[Product Owner Agent] 问题是什么？
+你: [回答]
+
+[Data Agent] 有什么数据？
+你: [回答]
+
+[Orchestrator] 基于以上，我形成以下假设：
+- H-001: 如果我们...那么...
+- H-002: 如果我们...那么...
+
+假设清单已保存到 hypotheses.md
+```
+
+### 4. 迭代循环
+
+```
+探索 → 构建 → 验证 → 学习 → (下一轮)
+```
+
+---
+
+## 与 Ship-Faster 的集成
+
+| Agent | 使用的 Skills |
+|-------|--------------|
+| Orchestrator | workflow-project-intake, workflow-brainstorm |
+| Product Owner | workflow-feature-shipper (plan-only) |
+| Data Agent | supabase, tool-systematic-debugging |
+| ML Agent | review-quality |
+| Dev Agent | workflow-feature-shipper, review-quality |
+| UX Agent | tool-design-style-selector, tool-ui-ux-pro-max |
+| DevOps Agent | cloudflare, deploy-* |
+
+---
 
 ## License
 

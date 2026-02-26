@@ -2,6 +2,34 @@
 
 基于 AAIF 框架（AI敏捷孵化框架）设计的多 Agent 协作模板。
 
+---
+
+## 🚀 快速安装
+
+**30分钟内完成从零到生产就绪的 AI 团队搭建！**
+
+### 一键安装
+
+```bash
+# macOS / Linux
+git clone https://github.com/xuha233/agent-team-template.git
+cd agent-team-template
+./install.sh
+```
+
+```powershell
+# Windows
+git clone https://github.com/xuha233/agent-team-template.git
+cd agent-team-template
+.\install.ps1
+```
+
+### 手动安装
+
+详见 **[SETUP.md](SETUP.md)** - 完整安装指南
+
+---
+
 ## 核心理念
 
 ### 从"任务分发"到"假设验证"

@@ -1,101 +1,74 @@
-# Agent Team 快速开始指南
+# Agent Team 快速开始
 
-## 安装
+> **首次安装？请先阅读 [SETUP.md](../SETUP.md)**
 
-### 1. 安装 ship-faster skills
+---
 
-```bash
-# 方法 1: 使用 npx (推荐)
-npx --yes skills add Heyvhuang/ship-faster --yes --agent claude-code
+## 启动团队
 
-# 方法 2: 手动安装
-git clone https://github.com/Heyvhuang/ship-faster.git
-cp -r ship-faster/skills/* ~/.claude/skills/
-```
-
-### 2. 克隆 Agent Team 模板
-
-```bash
-git clone https://github.com/YOUR_USERNAME/agent-team-template.git
-cd agent-team-template
-```
-
-### 3. 安装到项目
-
-```bash
-# 复制配置文件到你的项目
-cp agent-team.yaml YOUR_PROJECT/
-cp -r skills/ ~/.claude/skills/
-```
-
-## 使用方法
-
-### 方式 1: 通过 OpenClaw
-
-直接向 OpenClaw 发送需求：
+### 向 OpenClaw 发送需求
 
 ```
-我想做一个 AI 图片清理工具
+新项目：我想做一个 AI 图片清理工具
 ```
 
 OpenClaw 会自动：
-1. 使用 `workflow-project-intake` 澄清需求
-2. 生成 `proposal.md` 和 `context.json`
-3. 分发任务给 Workers
-4. 追踪进度并报告
+1. 评估项目复杂度
+2. 配置合适的团队
+3. 启动探索阶段
+4. 协调 Workers 执行
 
-### 方式 2: 手动初始化
+---
 
-```bash
-python scripts/init.py --path . --name "My Project" --goal "Build a tool"
-```
+## 工作流程
 
-然后向 OpenClaw 发送：
+### AAIF 循环
 
 ```
-读取 runs/intake/active/{run_id}/ 并继续
+探索 → 构建 → 验证 → 学习
+  ↑                         │
+  └─────────────────────────┘
 ```
+
+| 阶段 | 目标 | 参与者 |
+|------|------|--------|
+| **探索** | 理解问题，形成假设 | Orchestrator, PO, Data |
+| **构建** | 开发原型，训练模型 | Data, ML, Dev, UX |
+| **验证** | 评估效果，验证价值 | PO, ML, Domain Expert |
+| **学习** | 捕获经验，决定方向 | All Agents |
+
+---
 
 ## 核心概念
 
-### Orchestrator vs Worker
+### 假设驱动开发 (HDD)
 
-| 角色 | 工具 | 职责 |
+传统需求 → 可验证假设
+
+```
+需求: "用户希望个性化推荐"
+  ↓
+假设: "如果我们基于用户历史行为提供个性化推荐，
+      那么产品页转化率将提升至少10%"
+```
+
+每个假设包含：
+- 假设陈述
+- 验证方法
+- 成功/失败标准
+- 最小验证实验
+- 状态跟踪
+
+### 项目类型
+
+| 类型 | 特征 | 策略 |
 |------|------|------|
-| Orchestrator | OpenClaw | 需求澄清、任务分发、进度追踪 |
-| Worker | Claude Code / OpenCode | 执行任务、代码实现、测试验证 |
+| 探索型 | 问题模糊 | 快速失败，学习优先 |
+| 优化型 | 问题明确 | 可预测交付 |
+| 转型型 | 高业务影响 | 价值门控 |
+| 合规敏感型 | 高风险 | 严格检查点 |
 
-### 工作流程
-
-```
-用户 → OpenClaw (Intake) → Workers (Execute) → Review → 交付
-```
-
-### 关键文件
-
-| 文件 | 作用 |
-|------|------|
-| `proposal.md` | 需求文档 |
-| `context.json` | 配置和状态 |
-| `tasks.md` | 任务清单 |
-| `evidence/` | 证据文档 |
-| `logs/` | 日志 |
-
-## 配置开关
-
-在 `context.json` 中设置：
-
-```json
-{
-  "switches": {
-    "need_database": true,   // 启用 Supabase
-    "need_billing": true,    // 启用 Stripe
-    "need_auth": false,      // 无需认证
-    "need_deploy": true,     // 部署到 Vercel
-    "need_seo": false        // 无需 SEO
-  }
-}
-```
+---
 
 ## 常用命令
 
@@ -111,11 +84,29 @@ python scripts/init.py --path . --name "My Project" --goal "Build a tool"
 审查 / review
 ```
 
-### 部署
+### 添加假设
 
 ```
-部署 / 交付
+添加假设：如果我们...那么...
 ```
+
+---
+
+## 文件结构
+
+```
+runs/
+└── <run_id>/
+    ├── hypotheses.md          # 假设清单
+    ├── success-criteria.md    # 成功标准
+    ├── context.json           # 上下文配置
+    ├── exploration/           # 探索阶段输出
+    ├── build/                 # 构建阶段输出
+    ├── validate/              # 验证阶段输出
+    └── learn/                 # 学习阶段输出
+```
+
+---
 
 ## 故障排除
 
@@ -128,8 +119,15 @@ python scripts/init.py --path . --name "My Project" --goal "Build a tool"
 
 ### 任务失败
 
-检查 `logs/events.jsonl` 了解详情。
+检查 `runs/<run_id>/learn/learning-log.md` 了解详情。
 
 ### 恢复中断
 
-OpenClaw 会自动从 `tasks.md` 恢复进度。
+OpenClaw 会自动从 `hypotheses.md` 恢复进度。
+
+---
+
+## 下一步
+
+- 阅读完整 [README.md](../README.md) 了解 AAIF 框架
+- 查看 [templates/hypotheses.md](../templates/hypotheses.md) 学习假设模板

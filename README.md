@@ -1,4 +1,4 @@
-# Agent Team Template v2.0
+# Agent Team Template
 
 基于 AAIF 框架（AI敏捷孵化框架）设计的多 Agent 协作模板。
 

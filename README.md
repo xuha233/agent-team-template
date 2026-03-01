@@ -4,6 +4,21 @@
 
 ---
 
+> ## 🚀 推荐使用 AOP (Agent Orchestration Platform)
+> 
+> **AOP 是本项目的升级版**，融合了 AAIF 工作流 + MCO 执行引擎：
+> 
+> - **即开即用** — `pip install aop`，5 分钟上手
+> - **多 Provider** — 支持 Claude、Codex、Gemini、Qwen、OpenCode
+> - **CLI 完整** — `aop init`、`aop review`、`aop doctor` 等命令
+> - **工作流集成** — 假设驱动开发、学习捕获、项目评估
+> 
+> **GitHub**: https://github.com/xuha233/agent-orchestration-platform
+> 
+> 本仓库仍可作为学习 AAIF 框架的参考，但新项目建议直接使用 AOP。
+
+---
+
 ## 🚀 快速安装
 
 **30分钟内完成从零到生产就绪的 AI 团队搭建！**
